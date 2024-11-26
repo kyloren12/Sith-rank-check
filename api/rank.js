@@ -4,29 +4,34 @@ const fetch = require('node-fetch');
 const groupId = process.env.GROUP_ID;  // From Vercel's environment variables
 const requiredRank = parseInt(process.env.REQUIRED_RANK);  // From Vercel's environment variables
 
+const dns = require('dns');
+
 module.exports = async (req, res) => {
   const { ownerId } = req.query;
 
-  // Check if ownerId exists in the request query
   if (!ownerId) {
     return res.status(400).json({ success: false, message: "OwnerId is required" });
   }
 
   try {
+    console.log('Checking DNS for api.roblox.com...');
+    dns.lookup('api.roblox.com', (err, address, family) => {
+      if (err) {
+        console.log('DNS resolution failed: ', err);
+        return res.status(500).json({ success: false, message: "DNS resolution failed", error: err.message });
+      }
+      console.log('API domain resolved to:', address);
+    });
+
     // Fetch group information from Roblox API
     const response = await fetch(`https://api.roblox.com/groups/${groupId}`);
-
-    // If the request fails (status not OK), throw an error
     if (!response.ok) {
       throw new Error(`Failed to fetch group data: ${response.statusText}`);
     }
 
-    // Parse the response as JSON
     const groupInfo = await response.json();
 
-    // Check if groupInfo is valid and contains necessary data
     if (groupInfo && groupInfo.Owner && groupInfo.Owner.Id === parseInt(ownerId)) {
-      // Check if the owner has the required rank
       if (groupInfo.Owner.Rank >= requiredRank) {
         return res.status(200).json({ success: true });
       } else {
@@ -36,7 +41,7 @@ module.exports = async (req, res) => {
       return res.status(404).json({ success: false, message: "Owner not found" });
     }
   } catch (error) {
-    console.error("Error fetching group data:", error.message);  // Log the error message
+    console.error("Error fetching group data:", error.message);
     return res.status(500).json({ success: false, message: "Error fetching group data", error: error.message });
   }
 };
