@@ -1,10 +1,8 @@
 const fetch = require('node-fetch');
 const express = require('express');
-const bodyParser = require('body-parser');
-const noblox = require('noblox.js');
-// Access environment variables for group ID and required rank
-const groupId = process.env.GROUP_ID;  // From Vercel's environment variables
-const requiredRank = parseInt(process.env.REQUIRED_RANK);  // From Vercel's environment variables
+
+const groupId = parseInt(process.env.GROUP_ID, 10); // Ensure environment variables are parsed correctly
+const requiredRank = parseInt(process.env.REQUIRED_RANK, 10);
 
 module.exports = async (req, res) => {
   const { ownerId } = req.query;
@@ -14,34 +12,32 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log(`Fetching groups for user with ID: ${ownerId}`);  // Debugging print
-    const response = await fetch(`https://users.roblox.com/v1/users/${ownerId}/groups`);
-
-    // Log the full response for debugging
-    const responseBody = await response.text();
-    console.log(`Response status: ${response.status}`);
-    console.log(`Response body: ${responseBody}`);
+    console.log(`Fetching groups for user with ID: ${ownerId}`);
+    const response = await fetch(`https://groups.roblox.com/v1/users/${ownerId}/groups/roles`);
+    const responseBody = await response.json();
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch user groups for ownerId ${ownerId}: ${response.statusText}`);
+      console.error(`Failed to fetch groups for ownerId ${ownerId}:`, response.statusText);
+      return res.status(response.status).json({ success: false, message: "Failed to fetch user groups" });
     }
 
-    const userGroups = JSON.parse(responseBody);
-
-    const userGroup = userGroups.data.find(group => group.id === parseInt(groupId));
+    const userGroup = responseBody.data.find(group => group.group.id === groupId);
     if (!userGroup) {
-      console.log(`User with ID ${ownerId} is not a member of the group.`);  // Debugging print
-      return res.status(404).json({ success: false, message: `User with ID ${ownerId} is not a member of the group`, ownerId: ownerId });
+      console.log(`User with ID ${ownerId} is not a member of the group.`);
+      return res.status(404).json({ success: false, message: "User is not a member of the group" });
     }
 
-    if (userGroup.roleRank >= requiredRank) {
+    if (userGroup.role.rank >= requiredRank) {
+      console.log(`User with ID ${ownerId} has sufficient rank.`);
       return res.status(200).json({ success: true });
     } else {
-      return res.status(200).json({ success: false, message: "Insufficient rank", ownerId: ownerId });
+      console.log(`User with ID ${ownerId} has insufficient rank.`);
+      return res.status(200).json({ success: false, message: "Insufficient rank" });
     }
 
   } catch (error) {
-    console.error(`Error fetching group data for ownerId ${ownerId}:`, error.message);
-    return res.status(500).json({ success: false, message: "Error fetching group data", error: error.message, ownerId: ownerId });
+    console.error(`Error processing request for ownerId ${ownerId}:`, error.message);
+    return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
+
