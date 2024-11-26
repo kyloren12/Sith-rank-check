@@ -15,13 +15,16 @@ module.exports = async (req, res) => {
     console.log(`Fetching groups for user with ID: ${ownerId}`);  // Debugging print
     const response = await fetch(`https://users.roblox.com/v1/users/${ownerId}/groups`);
 
+    // Log the full response for debugging
+    const responseBody = await response.text();
+    console.log(`Response status: ${response.status}`);
+    console.log(`Response body: ${responseBody}`);
+
     if (!response.ok) {
-      const errorBody = await response.text();
-      console.error(`Error response body for ownerId ${ownerId}:`, errorBody);  // Log the full response body
       throw new Error(`Failed to fetch user groups for ownerId ${ownerId}: ${response.statusText}`);
     }
 
-    const userGroups = await response.json();
+    const userGroups = JSON.parse(responseBody);
 
     const userGroup = userGroups.data.find(group => group.id === parseInt(groupId));
     if (!userGroup) {
