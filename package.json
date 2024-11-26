@@ -1,13 +1,16 @@
 {
   "name": "roblox-backend",
   "version": "1.0.0",
-  "description": "Backend for checking Roblox group rank",
-  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "next build"  // For Next.js projects
+    "start": "node server.js",
+    "build": "next build"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0"
   }
 }
+
