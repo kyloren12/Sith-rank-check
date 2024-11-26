@@ -1,4 +1,5 @@
-const fetch = require("node-fetch");
+// api/rank.js
+const fetch = require('node-fetch');
 
 // Access environment variables for group ID and required rank
 const groupId = process.env.GROUP_ID;  // From Vercel's environment variables
@@ -11,16 +12,11 @@ module.exports = async (req, res) => {
     return res.status(400).json({ success: false, message: "OwnerId is required" });
   }
 
-  // Log for debugging
-  console.log(`Checking rank for ownerId: ${ownerId}`);
-
-  // Fetch group information from Roblox API
+  // Try to fetch group information from Roblox API
   try {
+    // Use Vercel to call Roblox API
     const response = await fetch(`https://api.roblox.com/groups/${groupId}`);
     const groupInfo = await response.json();
-
-    // Log the groupInfo to see its structure
-    console.log("Group info received: ", groupInfo);
 
     if (groupInfo && groupInfo.Owner && groupInfo.Owner.Id === parseInt(ownerId)) {
       // Check if the owner has the required rank
