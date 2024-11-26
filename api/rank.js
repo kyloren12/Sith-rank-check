@@ -4,8 +4,6 @@ const fetch = require('node-fetch');
 const groupId = process.env.GROUP_ID;  // From Vercel's environment variables
 const requiredRank = parseInt(process.env.REQUIRED_RANK);  // From Vercel's environment variables
 
-const dns = require('dns');
-
 module.exports = async (req, res) => {
   const { ownerId } = req.query;
 
@@ -14,15 +12,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('Checking DNS for api.roblox.com...');
-    dns.lookup('api.roblox.com', (err, address, family) => {
-      if (err) {
-        console.log('DNS resolution failed: ', err);
-        return res.status(500).json({ success: false, message: "DNS resolution failed", error: err.message });
-      }
-      console.log('API domain resolved to:', address);
-    });
-
     // Fetch group information from Roblox API
     const response = await fetch(`https://api.roblox.com/groups/${groupId}`);
     if (!response.ok) {
