@@ -7,19 +7,24 @@ const requiredRank = parseInt(process.env.REQUIRED_RANK);  // From Vercel's envi
 module.exports = async (req, res) => {
   const { ownerId } = req.query;
 
+  console.log("Received ownerId:", ownerId);  // Debugging print
+
   if (!ownerId) {
     return res.status(400).json({ success: false, message: "OwnerId is required" });
   }
 
   try {
-    // Fetch user group information using a different Roblox API endpoint
+    // Fetch user group information
     const response = await fetch(`https://users.roblox.com/v1/users/${ownerId}/groups`);
+    console.log("API Response Status:", response.status);  // Debugging print
+
     if (!response.ok) {
       throw new Error(`Failed to fetch user groups: ${response.statusText}`);
     }
 
     const userGroups = await response.json();
-    
+    console.log("User Groups:", userGroups);  // Debugging print
+
     const userGroup = userGroups.data.find(group => group.id === parseInt(groupId));
     if (!userGroup) {
       return res.status(404).json({ success: false, message: "User is not a member of the group" });
