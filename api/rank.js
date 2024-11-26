@@ -18,7 +18,11 @@ module.exports = async (req, res) => {
     const response = await fetch(`https://users.roblox.com/v1/users/${ownerId}/groups`);
     console.log("API Response Status:", response.status);  // Debugging print
 
+    // Check if the response is successful
     if (!response.ok) {
+      // Log the response body for debugging purposes
+      const errorBody = await response.text();
+      console.error("Error response body:", errorBody);  // Debugging print
       throw new Error(`Failed to fetch user groups: ${response.statusText}`);
     }
 
@@ -41,3 +45,4 @@ module.exports = async (req, res) => {
     return res.status(500).json({ success: false, message: "Error fetching group data", error: error.message });
   }
 };
+
