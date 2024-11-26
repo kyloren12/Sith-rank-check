@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
       // Log the response body for debugging purposes
       const errorBody = await response.text();
       console.error("Error response body:", errorBody);  // Debugging print
-      throw new Error(`Failed to fetch user groups: ${response.statusText}`);
+      throw new Error(`Failed to fetch user groups for ownerId ${ownerId}: ${response.statusText}`);
     }
 
     const userGroups = await response.json();
@@ -32,8 +32,8 @@ module.exports = async (req, res) => {
 
     const userGroup = userGroups.data.find(group => group.id === parseInt(groupId));
     if (!userGroup) {
-      console.log("User is not a member of the group.");  // Debugging print
-      return res.status(404).json({ success: false, message: "User is not a member of the group" });
+      console.log(`User with ID ${ownerId} is not a member of the group.`);  // Debugging print
+      return res.status(404).json({ success: false, message: `User with ID ${ownerId} is not a member of the group` });
     }
 
     console.log("User group found:", userGroup);  // Debugging print
@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
     }
 
   } catch (error) {
-    console.error("Error fetching group data:", error.message);
-    return res.status(500).json({ success: false, message: "Error fetching group data", error: error.message });
+    console.error("Error fetching group data for ownerId", ownerId, ":", error.message);
+    return res.status(500).json({ success: false, message: "Error fetching group data", error: error.message, ownerId: ownerId });
   }
 };
