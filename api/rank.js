@@ -43,7 +43,10 @@ module.exports = async (req, res) => {
     if (!userGroup) {
       const errorMessage = `User with ID ${ownerId} is not a member of the group.`;
       console.log(errorMessage);
-      sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}`); // Send error with player and group ID
+      const playerProfileLink = `https://roblox.com/users/${ownerId}/profile`;
+      sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}, Profile: ${playerProfileLink}`);
+
+   //   sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}`); // Send error with player and group ID
       return res.status(404).json({ success: false, message: "User is not a member of the group" });
     }
 
