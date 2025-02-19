@@ -48,7 +48,6 @@ module.exports = async (req, res) => {
 
     if (userGroup.role.rank >= requiredRank) {
       console.log(`User with ID ${ownerId} has sufficient rank.`);
-      sendWebhookMessage(`✅ User with ID ${ownerId} has sufficient rank. Profile: https://www.roblox.com/users/${ownerId}/profile`);
       return res.status(200).json({ success: true });
     } else {
       const errorMessage = `User with ID ${ownerId} has insufficient rank.`;
