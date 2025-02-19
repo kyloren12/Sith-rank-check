@@ -1,6 +1,3 @@
-sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https://www.roblox.com/users/${ownerId}/profile), Group ID: ${groupId}`);
-    return res.status(400).json({ success: false, message: errorMessage });
-  }
 
   try {
     console.log(`Fetching groups for user with ID: ${ownerId}`);
@@ -10,7 +7,7 @@ sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https
     if (!response.ok) {
       const errorMessage = `Failed to fetch groups for ownerId ${ownerId}: ${response.statusText}`;
       console.error(errorMessage);
-sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https://www.roblox.com/users/${ownerId}/profile), Group ID: ${groupId}`);
+      sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}`); // Send error with player and group ID
       return res.status(response.status).json({ success: false, message: "Failed to fetch user groups" });
     }
 
@@ -18,7 +15,10 @@ sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https
     if (!userGroup) {
       const errorMessage = `User with ID ${ownerId} is not a member of the group.`;
       console.log(errorMessage);
-sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https://www.roblox.com/users/${ownerId}/profile), Group ID: ${groupId}`);
+      const playerProfileLink = `https://roblox.com/users/${ownerId}/profile`;
+      sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}, Profile: ${playerProfileLink}`);
+
+   //   sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}`); // Send error with player and group ID
       return res.status(404).json({ success: false, message: "User is not a member of the group" });
     }
 
@@ -28,14 +28,14 @@ sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https
     } else {
       const errorMessage = `User with ID ${ownerId} has insufficient rank.`;
       console.log(errorMessage);
-sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https://www.roblox.com/users/${ownerId}/profile), Group ID: ${groupId}`);
+      sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}`); // Send error with player and group ID
       return res.status(200).json({ success: false, message: "Insufficient rank" });
     }
 
   } catch (error) {
     const errorMessage = `Error processing request for ownerId ${ownerId}: ${error.message}`;
     console.error(errorMessage);
-sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId} (Profile: https://www.roblox.com/users/${ownerId}/profile), Group ID: ${groupId}`);
+    sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}`); // Send error with player and group ID
     return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
