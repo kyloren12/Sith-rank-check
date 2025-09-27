@@ -5,6 +5,11 @@ const groupId = parseInt(process.env.GROUP_ID, 10);
 const requiredRank = parseInt(process.env.REQUIRED_RANK, 10);
 const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
+// 🔹 Extra manual check (you can hardcode more if needed)
+const extraGroupId = 34419564;      // <-- replace with other group ID
+const extraRequiredRank = 25;     // <-- replace with required rank for that group
+const alwaysAllowedUsers = [944593970, 32404749]; // <-- user IDs that always pass
+
 const sendWebhookMessage = async (message) => {
   try {
     await fetch(discordWebhookUrl, {
@@ -27,6 +32,12 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // ✅ Explicit allow list
+    if (alwaysAllowedUsers.includes(Number(ownerId))) {
+      console.log(`User ${ownerId} is always allowed.`);
+      return res.status(200).json({ success: true, message: "User explicitly allowed" });
+    }
+
     console.log(`Fetching groups for user with ID: ${ownerId}`);
     const response = await fetch(`https://groups.roblox.com/v1/users/${ownerId}/groups/roles`);
     const responseBody = await response.json();
@@ -38,23 +49,25 @@ module.exports = async (req, res) => {
       return res.status(response.status).json({ success: false, message: "Failed to fetch user groups" });
     }
 
+    // ✅ First check the original env group/rank
     const userGroup = responseBody.data.find(group => group.group.id === groupId);
-    if (!userGroup) {
-      const errorMessage = `User with ID ${ownerId} is not a member of the group.`;
-      console.log(errorMessage);
-      sendWebhookMessage(`Error: ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}, Profile: https://www.roblox.com/users/${ownerId}/profile`);
-      return res.status(404).json({ success: false, message: "User is not a member of the group" });
+    if (userGroup && userGroup.role.rank >= requiredRank) {
+      console.log(`User with ID ${ownerId} has sufficient rank in main group.`);
+      return res.status(200).json({ success: true });
     }
 
-    if (userGroup.role.rank >= requiredRank) {
-      console.log(`User with ID ${ownerId} has sufficient rank.`);
+    // ✅ Then check the extra manual group/rank
+    const extraGroup = responseBody.data.find(group => group.group.id === extraGroupId);
+    if (extraGroup && extraGroup.role.rank >= extraRequiredRank) {
+      console.log(`User with ID ${ownerId} has sufficient rank in extra group.`);
       return res.status(200).json({ success: true });
-    } else {
-      const errorMessage = `User with ID ${ownerId} has insufficient rank.`;
-      console.log(errorMessage);
-      sendWebhookMessage(`⚠️ ${errorMessage} Player ID: ${ownerId}, Group ID: ${groupId}, Profile: https://www.roblox.com/users/${ownerId}/profile`);
-      return res.status(200).json({ success: false, message: "Insufficient rank" });
     }
+
+    // If no group passes
+    const errorMessage = `User with ID ${ownerId} does not meet group requirements.`;
+    console.log(errorMessage);
+    sendWebhookMessage(`⚠️ ${errorMessage} Player ID: ${ownerId}, Profile: https://www.roblox.com/users/${ownerId}/profile`);
+    return res.status(200).json({ success: false, message: "Insufficient rank or not in group" });
 
   } catch (error) {
     const errorMessage = `Error processing request for ownerId ${ownerId}: ${error.message}`;
