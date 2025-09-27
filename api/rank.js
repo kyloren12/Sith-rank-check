@@ -6,9 +6,9 @@ const requiredRank = parseInt(process.env.REQUIRED_RANK, 10);
 const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
 // 🔹 Extra manual check (you can hardcode more if needed)
-const extraGroupId = 34419564;      // <-- replace with other group ID
+const extraGroupId = 34419564;      // <-- Oom TGE
 const extraRequiredRank = 25;     // <-- replace with required rank for that group
-const alwaysAllowedUsers = [944593970, 32404749]; // <-- user IDs that always pass
+const alwaysAllowedUsers = [944593970, 32404749]; // <-- Oom and pain IRC member
 
 const sendWebhookMessage = async (message) => {
   try {
